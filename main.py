@@ -164,81 +164,44 @@ class SearchEngine:
 
 
 	def evaluateDataset(self):
-		"""
-		- preprocesses the queries and documents, stores in output folder
-		- invokes the IR system
-		- evaluates precision, recall, fscore, nDCG and MAP 
-		  for all queries in the Cranfield dataset
-		- produces graphs of the evaluation metrics in the output folder
-		"""
-		
 		if args.dataset == "cranfield/":
 			datasetToBeUsed = "cran"
 		else:
 			datasetToBeUsed = args.dataset[:-1]
-			
 
-		# Read queries
 		queries_json = json.load(open(args.dataset + datasetToBeUsed + "_queries.json", 'r'))[:]
-		query_ids, queries = [item["query number"] for item in queries_json], \
-								[item["query"] for item in queries_json]
-		# Process queries 
+		query_ids, queries = [item["query number"] for item in queries_json], [item["query"] for item in queries_json]
 		processedQueries = self.preprocessQueries(queries)
 
-		# Read documents
 		docs_json = json.load(open(args.dataset + datasetToBeUsed +  "_docs.json", 'r'))[:]
-		doc_ids, docs = [item["id"] for item in docs_json], \
-								[item["body"] for item in docs_json]
-		# Process documents
+		doc_ids, docs = [item["id"] for item in docs_json], [item["body"] for item in docs_json]
 		processedDocs = self.preprocessDocs(docs)
 
-		# Start measuring time
 		start_time = time.time()
 
-		# Build document index
 		self.informationRetriever.buildIndex(processedDocs, doc_ids, raw_docs=docs)
-		# Rank the documents for each query
 		if self.args.model == "lsa":
 			doc_IDs_ordered = list(tqdm(run_lsa_model(processedDocs, processedQueries, doc_ids), desc="Ranking Queries"))
 		else:
 			self.informationRetriever.buildIndex(processedDocs, doc_ids)
 			doc_IDs_ordered = list(tqdm(self.informationRetriever.rank(processedQueries), desc="Ranking Queries"))
 
-		# End measuring time
 		end_time = time.time()
 		runtime = end_time - start_time
 		print(f"IR System Run Time: {runtime:.4f} seconds")
 
-		# Read relevance judements
 		qrels = json.load(open(args.dataset +  datasetToBeUsed + "_qrels.json", 'r'))[:]
 
-		# Calculate precision, recall, f-score, MAP and nDCG for k = 1 to 10
 		precisions, recalls, fscores, MAPs, nDCGs = [], [], [], [], []
 		outRanks = 20
 		for k in range(1, outRanks+1):
-			precision = self.evaluator.meanPrecision(
-				doc_IDs_ordered, query_ids, qrels, k)
-			precisions.append(precision)
-			recall = self.evaluator.meanRecall(
-				doc_IDs_ordered, query_ids, qrels, k)
-			recalls.append(recall)
-			fscore = self.evaluator.meanFscore(
-				doc_IDs_ordered, query_ids, qrels, k)
-			fscores.append(fscore)
-			# print("Precision, Recall and F-score @ " +  
-			# 	str(k) + " : " + str(precision) + ", " + str(recall) + 
-			# 	", " + str(fscore))
-			MAP = self.evaluator.meanAveragePrecision(
-				doc_IDs_ordered, query_ids, qrels, k)
-			MAPs.append(MAP)
-			nDCG = self.evaluator.meanNDCG(
-				doc_IDs_ordered, query_ids, qrels, k)
-			nDCGs.append(nDCG)
-			# print("MAP, nDCG @ " +  
-			# 	str(k) + " : " + str(MAP) + ", " + str(nDCG))
-			print(f"@{k} : Precision:{precision:.4f}, Recall:{recall:.4f}, F-score:{fscore:.4f}, MAP:{MAP:.4f}, nDCG:{nDCG:.4f}")
+			precisions.append(self.evaluator.meanPrecision(doc_IDs_ordered, query_ids, qrels, k))
+			recalls.append(self.evaluator.meanRecall(doc_IDs_ordered, query_ids, qrels, k))
+			fscores.append(self.evaluator.meanFscore(doc_IDs_ordered, query_ids, qrels, k))
+			MAPs.append(self.evaluator.meanAveragePrecision(doc_IDs_ordered, query_ids, qrels, k))
+			nDCGs.append(self.evaluator.meanNDCG(doc_IDs_ordered, query_ids, qrels, k))
+			print(f"@{k} : Precision:{precisions[-1]:.4f}, Recall:{recalls[-1]:.4f}, F-score:{fscores[-1]:.4f}, MAP:{MAPs[-1]:.4f}, nDCG:{nDCGs[-1]:.4f}")
 
-		# Plot the metrics and save plot 
 		plt.plot(range(1, outRanks+1), precisions, label="Precision")
 		plt.plot(range(1, outRanks+1), recalls, label="Recall")
 		plt.plot(range(1, outRanks+1), fscores, label="F-Score")
@@ -248,6 +211,47 @@ class SearchEngine:
 		plt.title("Evaluation Metrics - Cranfield Dataset")
 		plt.xlabel("k")
 		plt.savefig(args.out_folder + datasetToBeUsed + "_eval_plot.png")
+
+		# Save per-query scores @k=10
+		k = 10
+		per_query_metrics = {
+			"map": self.evaluator.perQueryAveragePrecision(doc_IDs_ordered, query_ids, qrels, k),
+			"ndcg": self.evaluator.perQueryNDCG(doc_IDs_ordered, query_ids, qrels, k),
+			"precision": self.evaluator.perQueryPrecision(doc_IDs_ordered, query_ids, qrels, k)
+		}
+		model_id = self.args.model
+		flags = []
+		if self.args.rerank:
+			flags.append("rerank")
+		if self.args.expand:
+			flags.append("expand")
+		if self.args.spell:
+			flags.append("spell")
+		flag_str = "_".join(flags) if flags else "plain"
+		out_dir = os.path.join(self.args.out_folder, "results")
+		os.makedirs(out_dir, exist_ok=True)
+		out_path = os.path.join(out_dir, f"{model_id}_{flag_str}_scores_k10.json")
+		with open(out_path, "w") as f:
+			json.dump(per_query_metrics, f, indent=2)
+		print(f"✅ Saved per-query scores to {out_path}")
+
+		# Save mean MAP@10 for current config
+		metrics_path = "output/run_times.csv"
+		run_summary = {
+			"model": self.args.model,
+			"rerank": self.args.rerank,
+			"expand": self.args.expand,
+			"spell": self.args.spell,
+			"runtime_sec": round(runtime, 2),
+			"mean_MAP@10": round(MAPs[9], 4)  # k=10 is index 9
+		}
+		file_exists = os.path.exists(metrics_path)
+		with open(metrics_path, "a", newline="") as f:
+			import csv
+			writer = csv.DictWriter(f, fieldnames=run_summary.keys())
+			if not file_exists:
+				writer.writeheader()
+			writer.writerow(run_summary)
 
 		
 	def handleCustomQuery(self):

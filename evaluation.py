@@ -78,6 +78,12 @@ class Evaluation():
 		meanPrecision = sum(precisions) / len(precisions)
 
 		return meanPrecision
+	
+	def perQueryPrecision(self, doc_IDs_ordered, query_ids, qrels, k):
+		return [
+			self.queryPrecision(doc_IDs_ordered[i], query_ids[i], self.get_true_doc_ids(query_ids[i], qrels), k)
+			for i in range(len(query_ids))
+		]
 
 	
 	def queryRecall(self, query_doc_IDs_ordered, query_id, true_doc_IDs, k):
@@ -150,6 +156,12 @@ class Evaluation():
 		meanRecall = sum(recalls) / len(recalls)
 
 		return meanRecall
+	
+	def perQueryRecall(self, doc_IDs_ordered, query_ids, qrels, k):
+		return [
+			self.queryRecall(doc_IDs_ordered[i], query_ids[i], self.get_true_doc_ids(query_ids[i], qrels), k)
+			for i in range(len(query_ids))
+		]
 
 
 	def queryFscore(self, query_doc_IDs_ordered, query_id, true_doc_IDs, k):
@@ -225,7 +237,12 @@ class Evaluation():
 		meanFscore = sum(fs) / len(fs)
 
 		return meanFscore
-	
+
+	def perQueryFscore(self, doc_IDs_ordered, query_ids, qrels, k):
+		return [
+			self.queryFscore(doc_IDs_ordered[i], query_ids[i], self.get_true_doc_ids(query_ids[i], qrels), k)
+			for i in range(len(query_ids))
+		]	
 
 	def queryNDCG(self, query_doc_IDs_ordered, query_id, true_doc_IDs, qrels, k):
 		"""
@@ -312,6 +329,12 @@ class Evaluation():
 		meanNDCG = sum(ndcgs) / len(ndcgs)
 
 		return meanNDCG
+	
+	def perQueryNDCG(self, doc_IDs_ordered, query_ids, qrels, k):
+		return [
+			self.queryNDCG(doc_IDs_ordered[i], query_ids[i], self.get_true_doc_ids(query_ids[i], qrels), qrels, k)
+			for i in range(len(query_ids))
+		]
 
 
 	def queryAveragePrecision(self, query_doc_IDs_ordered, query_id, true_doc_IDs, k):
@@ -387,4 +410,9 @@ class Evaluation():
 		meanAveragePrecision = sum(maps) / len(maps)
 
 		return meanAveragePrecision
-
+	
+	def perQueryAveragePrecision(self, doc_IDs_ordered, query_ids, qrels, k):
+		return [
+			self.queryAveragePrecision(doc_IDs_ordered[i], query_ids[i], self.get_true_doc_ids(query_ids[i], qrels), k)
+			for i in range(len(query_ids))
+		]
