@@ -1,0 +1,11 @@
+IR System Run Time: 0.4141 seconds
+@1 : Precision:0.7067, Recall:0.1202, F-score:0.3312, MAP:0.1202, nDCG:0.5867
+@2 : Precision:0.5978, Recall:0.1993, F-score:0.3939, MAP:0.1922, nDCG:0.5372
+@3 : Precision:0.5407, Recall:0.2608, F-score:0.4133, MAP:0.2415, nDCG:0.5167
+@4 : Precision:0.4700, Recall:0.2954, F-score:0.3924, MAP:0.2671, nDCG:0.4960
+@5 : Precision:0.4249, Recall:0.3256, F-score:0.3758, MAP:0.2859, nDCG:0.4874
+@6 : Precision:0.3837, Recall:0.3494, F-score:0.3549, MAP:0.2982, nDCG:0.4858
+@7 : Precision:0.3556, Recall:0.3730, F-score:0.3401, MAP:0.3112, nDCG:0.4870
+@8 : Precision:0.3267, Recall:0.3885, F-score:0.3212, MAP:0.3190, nDCG:0.4869
+@9 : Precision:0.3052, Recall:0.4019, F-score:0.3059, MAP:0.3251, nDCG:0.4889
+@10 : Precision:0.2898, Recall:0.4202, F-score:0.2956, MAP:0.3326, nDCG:0.4935

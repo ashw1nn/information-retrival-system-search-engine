@@ -1,0 +1,13 @@
+[SpellCorrector] Loaded 4046 domain terms from cache.
+[SBERT] Loading cached embeddings...
+IR System Run Time: 1.9670 seconds
+@1 : Precision:0.6978, Recall:0.1184, F-score:0.3259, MAP:0.1184, nDCG:0.5744
+@2 : Precision:0.5911, Recall:0.1961, F-score:0.3875, MAP:0.1887, nDCG:0.5245
+@3 : Precision:0.5230, Recall:0.2508, F-score:0.3976, MAP:0.2328, nDCG:0.5009
+@4 : Precision:0.4567, Recall:0.2857, F-score:0.3804, MAP:0.2572, nDCG:0.4816
+@5 : Precision:0.4169, Recall:0.3186, F-score:0.3684, MAP:0.2779, nDCG:0.4762
+@6 : Precision:0.3793, Recall:0.3475, F-score:0.3511, MAP:0.2917, nDCG:0.4773
+@7 : Precision:0.3537, Recall:0.3720, F-score:0.3383, MAP:0.3051, nDCG:0.4795
+@8 : Precision:0.3272, Recall:0.3905, F-score:0.3218, MAP:0.3146, nDCG:0.4814
+@9 : Precision:0.3057, Recall:0.4052, F-score:0.3067, MAP:0.3209, nDCG:0.4839
+@10 : Precision:0.2889, Recall:0.4192, F-score:0.2948, MAP:0.3277, nDCG:0.4868

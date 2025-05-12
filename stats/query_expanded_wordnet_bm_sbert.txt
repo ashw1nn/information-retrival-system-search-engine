@@ -1,0 +1,12 @@
+[SBERT] Loading cached embeddings...
+IR System Run Time: 3.0253 seconds
+@1 : Precision:0.6844, Recall:0.1179, F-score:0.3238, MAP:0.1179, nDCG:0.5744
+@2 : Precision:0.5822, Recall:0.1924, F-score:0.3821, MAP:0.1840, nDCG:0.5225
+@3 : Precision:0.5200, Recall:0.2488, F-score:0.3957, MAP:0.2293, nDCG:0.5010
+@4 : Precision:0.4633, Recall:0.2905, F-score:0.3873, MAP:0.2579, nDCG:0.4890
+@5 : Precision:0.4124, Recall:0.3202, F-score:0.3666, MAP:0.2750, nDCG:0.4800
+@6 : Precision:0.3748, Recall:0.3447, F-score:0.3476, MAP:0.2883, nDCG:0.4773
+@7 : Precision:0.3473, Recall:0.3671, F-score:0.3329, MAP:0.3001, nDCG:0.4788
+@8 : Precision:0.3222, Recall:0.3849, F-score:0.3171, MAP:0.3095, nDCG:0.4808
+@9 : Precision:0.2973, Recall:0.3948, F-score:0.2985, MAP:0.3143, nDCG:0.4805
+@10 : Precision:0.2804, Recall:0.4117, F-score:0.2865, MAP:0.3201, nDCG:0.4839
