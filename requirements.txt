@@ -1,0 +1,11 @@
+numpy
+nltk
+scikit-learn
+matplotlib
+tqdm
+ir_datasets
+rank_bm25
+gensim
+sentence-transformers
+torch
+symspellpy
