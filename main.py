@@ -171,21 +171,21 @@ class SearchEngine:
 		- produces graphs of the evaluation metrics in the output folder
 		"""
 		
-		if args.dataset == "cranfield":
+		if args.dataset == "cranfield/":
 			datasetToBeUsed = "cran"
 		else:
 			datasetToBeUsed = args.dataset
 			
 
 		# Read queries
-		queries_json = json.load(open(args.dataset + "/" + datasetToBeUsed + "_queries.json", 'r'))[:]
+		queries_json = json.load(open(args.dataset + datasetToBeUsed + "_queries.json", 'r'))[:]
 		query_ids, queries = [item["query number"] for item in queries_json], \
 								[item["query"] for item in queries_json]
 		# Process queries 
 		processedQueries = self.preprocessQueries(queries)
 
 		# Read documents
-		docs_json = json.load(open(args.dataset + "/" + datasetToBeUsed +  "_docs.json", 'r'))[:]
+		docs_json = json.load(open(args.dataset + datasetToBeUsed +  "_docs.json", 'r'))[:]
 		doc_ids, docs = [item["id"] for item in docs_json], \
 								[item["body"] for item in docs_json]
 		# Process documents
@@ -205,7 +205,7 @@ class SearchEngine:
 		print(f"IR System Run Time: {runtime:.4f} seconds")
 
 		# Read relevance judements
-		qrels = json.load(open(args.dataset + "/" +  datasetToBeUsed + "_qrels.json", 'r'))[:]
+		qrels = json.load(open(args.dataset +  datasetToBeUsed + "_qrels.json", 'r'))[:]
 
 		# Calculate precision, recall, f-score, MAP and nDCG for k = 1 to 10
 		precisions, recalls, fscores, MAPs, nDCGs = [], [], [], [], []

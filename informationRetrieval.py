@@ -18,11 +18,14 @@ class InformationRetrieval():
         self.docIDs = None
         self.original_docs = None
         if self.args.rerank:
-            domain_specific_embeddings = f"{self.args.out_folder}/{self.args.dataset}_sbert_embeddings.pt"
-            self.sbert = SBERTReRanker(cache_path=domain_specific_embeddings)
+            # domain_specific_embeddings = f"{self.args.out_folder}{self.args.dataset}_sbert_embeddings.pt"
+            # self.sbert = SBERTReRanker(cache_path=domain_specific_embeddings)
+            self.sbert = SBERTReRanker()
         if self.args.spell:
-            domain_specific_dict = f"{self.args.out_folder}/{self.args.dataset}_domain_terms.json"
-            self.spell_corrector = SpellCorrector(domain_cache_path=domain_specific_dict)
+            # domain_specific_dict = f"{self.args.out_folder}{self.args.dataset}_domain_terms.json"
+            # self.spell_corrector = SpellCorrector(domain_cache_path=domain_specific_dict)
+            self.spell_corrector = SpellCorrector()
+            
        
 
     def buildIndex(self, docs, docIDs, raw_docs=None):
