@@ -11,6 +11,7 @@ from inflectionReduction import InflectionReduction
 from stopwordRemoval import StopwordRemoval
 from informationRetrieval import InformationRetrieval
 from evaluation import Evaluation
+from models import run_lsa_model
 
 from sys import version_info
 import argparse
@@ -174,7 +175,7 @@ class SearchEngine:
 		if args.dataset == "cranfield/":
 			datasetToBeUsed = "cran"
 		else:
-			datasetToBeUsed = args.dataset
+			datasetToBeUsed = args.dataset[:-1]
 			
 
 		# Read queries
@@ -197,7 +198,11 @@ class SearchEngine:
 		# Build document index
 		self.informationRetriever.buildIndex(processedDocs, doc_ids, raw_docs=docs)
 		# Rank the documents for each query
-		doc_IDs_ordered = list(tqdm(self.informationRetriever.rank(processedQueries), desc="Ranking Queries"))
+		if self.args.model == "lsa":
+			doc_IDs_ordered = list(tqdm(run_lsa_model(processedDocs, processedQueries, doc_ids), desc="Ranking Queries"))
+		else:
+			self.informationRetriever.buildIndex(processedDocs, doc_ids)
+			doc_IDs_ordered = list(tqdm(self.informationRetriever.rank(processedQueries), desc="Ranking Queries"))
 
 		# End measuring time
 		end_time = time.time()
@@ -267,6 +272,11 @@ class SearchEngine:
 		self.informationRetriever.buildIndex(processedDocs, doc_ids, raw_docs=docs)
 		# Rank the documents for the query
 		doc_IDs_ordered = self.informationRetriever.rank([processedQuery])[0]
+		if self.args.model == "lsa":
+			doc_IDs_ordered = run_lsa_model(processedDocs, processedQuery, doc_ids)
+		else:
+			self.informationRetriever.buildIndex(processedDocs, doc_ids)
+			doc_IDs_ordered = self.informationRetriever.rank([processedQuery])[0]
 
 		# Print the IDs of first five documents
 		print("\nTop five document IDs : ")
@@ -292,15 +302,14 @@ if __name__ == "__main__":
 	parser.add_argument('-custom', action = "store_true", 
 						help = "Take custom query as input")
 	# Added by me
+	parser.add_argument('-model', default='bm25', choices=['bm25', 'tfidf', 'lsa'],
+						help="IR model to use: bm25 or tfidf or lsa")
 	parser.add_argument('--no-expand', dest='expand', action='store_false',
 						help="Disable query expansion (enabled by default)")
 	parser.add_argument('--no-rerank', dest='rerank', action='store_false',
 						help="Disable SBERT reranking (enabled by default)")
 	parser.add_argument('--no-spell', dest='spell', action='store_false',
 						help="Disable spell correction (enabled by default)")
-	parser.add_argument('--use-tfidf', action='store_true',
-						help="Use TF-IDF instead of BM25 for initial document scoring")
-
 
 	# Default values (enabled unless user disables)
 	parser.set_defaults(expand=True, rerank=True, spell=True)

@@ -1,4 +1,5 @@
 from util import *
+import json
 
 # Add your import statements here
 import os
@@ -16,15 +17,12 @@ class InformationRetrieval():
         self.doc_vectors = None
         self.corpus_tokens = None
         self.docIDs = None
-        self.original_docs = None
         if self.args.rerank:
-            # domain_specific_embeddings = f"{self.args.out_folder}{self.args.dataset}_sbert_embeddings.pt"
-            # self.sbert = SBERTReRanker(cache_path=domain_specific_embeddings)
-            self.sbert = SBERTReRanker()
+            cache_path = f"{self.args.out_folder}{self.args.dataset[:-1]}_sbert_embeddings.pt"
+            self.sbert = SBERTReRanker(cache_path=cache_path)
         if self.args.spell:
-            # domain_specific_dict = f"{self.args.out_folder}{self.args.dataset}_domain_terms.json"
-            # self.spell_corrector = SpellCorrector(domain_cache_path=domain_specific_dict)
-            self.spell_corrector = SpellCorrector()
+            cache_path = f"{self.args.out_folder}{self.args.dataset[:-1]}_domain_terms.json"
+            self.spell_corrector = SpellCorrector(domain_cache_path=cache_path)
             
        
 
@@ -41,7 +39,6 @@ class InformationRetrieval():
         """
         # print(f"[DEBUG] Received {len(raw_docs)} raw docs") if raw_docs else print("[DEBUG] raw_docs is None")
         self.docIDs = docIDs
-        self.original_docs = raw_docs
         self.corpus_tokens = []
 
         corpus = []
@@ -52,7 +49,7 @@ class InformationRetrieval():
             self.corpus_tokens.append(flat_tokens)
             corpus.append(" ".join(flat_tokens))  # For TF-IDF
 
-        if self.args.use_tfidf:
+        if self.args.model == "tfidf":
             print("[IR] Using TF-IDF for document scoring.")
             self.vectorizer = TfidfVectorizer()
             self.doc_vectors = self.vectorizer.fit_transform(corpus)
@@ -98,7 +95,7 @@ class InformationRetrieval():
             # print(f"\n[Query {idx+1}] Original: {' '.join(original_tokens)}")
             # print(f"[Query {idx+1}] Expanded: {' '.join(query_tokens)}")
 
-            if self.args.use_tfidf:
+            if self.args.model == "tfidf":
                 # TF-IDF scoring
                 query_str = " ".join(query_tokens)
                 query_vec = self.vectorizer.transform([query_str])
@@ -111,7 +108,7 @@ class InformationRetrieval():
 
             # Save BM25 scores and doc info
             top_docIDs = [self.docIDs[i] for i in ranked_indices]
-            top_docTexts = [self.original_docs[i] for i in ranked_indices]
+            # top_docTexts = [self.original_docs[i] for i in ranked_indices]
             bm25_scores = [scores[i] for i in ranked_indices]
 
             # Flatten query for SBERT
@@ -142,3 +139,13 @@ class InformationRetrieval():
             doc_IDs_ordered.append(final_reranked_docIDs)
 
         return doc_IDs_ordered
+
+
+_tokenized_docs_cache = None
+
+def get_tokenized_docs():
+    global _tokenized_docs_cache
+    if _tokenized_docs_cache is None:
+        with open("output/tokenized_docs.txt", 'r') as f:
+            _tokenized_docs_cache = json.load(f)
+    return _tokenized_docs_cache
